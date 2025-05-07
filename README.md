@@ -24,3 +24,49 @@ To add a new service to the Home Dash dashboard, you need to update the `service
     "private": true
   }
 ]
+```
+
+## Running with Docker
+
+Home Dash supports both **regular Docker** and **Docker Compose**.
+
+### Using Regular Docker
+
+1. Build the image:
+   ```bash
+   docker build -t home-dash .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -d --name home-dash -p 3000:3000 --env-file .env home-dash
+   ```
+
+3. Stop and remove the container:
+   ```bash
+   docker stop home-dash && docker rm home-dash
+   ```
+
+### Using Docker Compose
+
+1. Make sure Docker Compose is installed.
+
+2. Build and start the container:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. Stop the container:
+   ```bash
+   docker compose down
+   ```
+
+### Cleaning Up Docker
+
+To remove unused containers, images, and networks:
+
+```bash
+docker system prune -a
+```
+
+> Note: Ensure you have a `.env` file with any required environment variables before running the container.
