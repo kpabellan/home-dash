@@ -40,7 +40,7 @@ export default async function Home() {
   const privateServices = services.filter((s) => s.private);
 
   return (
-    <main className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col items-center justify-center p-8 space-y-8 hide-scrollbar">
+    <main className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col items-center justify-center p-8 space-y-8 hide-scrollbar" style={{ backgroundImage: "url('/forest.jpg')" }}>
       <div className="w-full max-w-5xl flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold text-gradient bg-clip-text">Welcome Home</h1>
         <Weather />
