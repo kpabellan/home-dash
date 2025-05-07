@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import Image from "next/image";
 import Weather from "@/components/Weather";
 
@@ -29,18 +31,11 @@ function ServiceList({ services }) {
   );
 }
 
-export async function getStaticProps() {
-  const res = await fetch('../data/services.json');
-  const services = await res.json();
+export default async function Home() {
+  const filePath = path.join(process.cwd(), "src/data/services.json");
+  const fileContents = fs.readFileSync(filePath, "utf8");
+  const services = JSON.parse(fileContents);
 
-  return {
-    props: {
-      services
-    }
-  };
-}
-
-export default function Home({ services }) {
   const publicServices = services.filter((s) => !s.private);
   const privateServices = services.filter((s) => s.private);
 
