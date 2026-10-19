@@ -36,8 +36,10 @@ export default async function Home() {
   const fileContents = fs.readFileSync(filePath, "utf8");
   const services = JSON.parse(fileContents);
 
-  const publicServices = services.filter((s) => !s.private);
-  const privateServices = services.filter((s) => s.private);
+  const infrastructureServices = services.filter((s) => s.group === "infrastructure");
+  const appServices = services.filter((s) => s.group !== "infrastructure");
+  const publicServices = appServices.filter((s) => !s.private);
+  const privateServices = appServices.filter((s) => s.private);
 
   return (
     <main className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col items-center justify-center p-8 space-y-8 hide-scrollbar" style={{ backgroundImage: "url('/forest.jpg')" }}>
@@ -59,6 +61,14 @@ export default async function Home() {
         <p className="text-left text-lg mb-1">Services that require authentication or are restricted to admin.</p>
         <div className="w-full bg-gray-700/40 backdrop-blur-sm rounded-xl p-3 shadow-xl border border-white/10">
           <ServiceList services={privateServices} />
+        </div>
+      </div>
+
+      <div className="w-full max-w-5xl space-y-2 mt-8">
+        <h2 className="text-3xl font-bold text-left">Infrastructure</h2>
+        <p className="text-left text-lg mb-1">Network and storage management, restricted to admin.</p>
+        <div className="w-full bg-gray-700/40 backdrop-blur-sm rounded-xl p-3 shadow-xl border border-white/10">
+          <ServiceList services={infrastructureServices} />
         </div>
       </div>
     </main>
