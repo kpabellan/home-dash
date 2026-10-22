@@ -1,5 +1,6 @@
 import http from "http";
 import https from "https";
+import { cachedLookup } from "./dnsCache";
 
 const TIMEOUT_MS = 6000;
 
@@ -50,6 +51,7 @@ function request(base, path, cfg) {
         method: "GET",
         timeout: TIMEOUT_MS,
         rejectUnauthorized: cfg.verifyTls,
+        lookup: cachedLookup,
         headers: { Authorization: cfg.auth, Accept: "application/json" },
       },
       (res) => {

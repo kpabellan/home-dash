@@ -1,5 +1,6 @@
 import http from "http";
 import https from "https";
+import { cachedLookup } from "@/lib/dnsCache";
 import { loadServices } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,7 @@ function probe(url) {
         method: "GET",
         timeout: TIMEOUT_MS,
         rejectUnauthorized: false,
+        lookup: cachedLookup,
         headers: { "User-Agent": "HomeDash/2.0 (+status-check)" },
       },
       (res) => {
