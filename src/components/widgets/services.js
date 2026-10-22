@@ -31,7 +31,10 @@ function useLinkProps(url) {
 function StatusLabel({ result }) {
   const state = serviceState(result);
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-fg-3 tabular-nums whitespace-nowrap">
+    <span
+      className="inline-flex items-center gap-1.5 text-xs text-fg-3 tabular-nums whitespace-nowrap"
+      title={state === "down" ? `Down: ${result.error ?? "no response"}` : undefined}
+    >
       <StatusDot state={state} pulse />
       {state === "up" ? `${result.latency} ms` : state === "down" ? "Down" : "Checking"}
     </span>

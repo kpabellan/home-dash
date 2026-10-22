@@ -52,13 +52,22 @@ function probe(url) {
   });
 }
 
+// Probe a few services at a time. Firing every check at once sends a burst of
+// DNS queries that local resolvers such as AdGuard Home rate-limit (20/s per
+// client by default), which made healthy services time out.
+const CONCURRENCY = 4;
+
 async function checkAll() {
   const services = loadServices();
-  const results = await Promise.all(services.map((s) => probe(s.url)));
   const data = {};
-  services.forEach((s, i) => {
-    data[s.id] = results[i];
-  });
+  let next = 0;
+  const worker = async () => {
+    while (next < services.length) {
+      const s = services[next++];
+      data[s.id] = await probe(s.url);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, services.length) }, worker));
   return { checkedAt: Date.now(), services: data };
 }
 
