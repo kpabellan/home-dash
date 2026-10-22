@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Uptime Kuma",
+        "url": "https://uptime.example.com/",
+        "icon": "/service-icons/uptime-kuma.png",
+        "description": "Self-hosted status page and monitoring system.",
+        "private": false
+    },
+    {
+        "name": "Vaultwarden",
+        "url": "https://vault.example.com/",
+        "icon": "/service-icons/vaultwarden.png",
+        "description": "Lightweight Bitwarden-compatible password manager.",
+        "private": true
+    },
+    {
+        "name": "Proxmox",
+        "url": "https://pve.example.com/",
+        "icon": "/service-icons/proxmox.png",
+        "description": "Virtualization server.",
+        "private": true,
+        "group": "infrastructure"
+    }
+]
