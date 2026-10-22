@@ -45,7 +45,7 @@ function contrastText(hex) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3 ? "#0b0d12" : "#ffffff";
 }
 
-export default function Dashboard({ services }) {
+export default function Dashboard({ services, proxmox = false }) {
   const [state, setState] = useState(null);
   const [upload, setUploadState] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -339,12 +339,13 @@ export default function Dashboard({ services }) {
         settings: state.settings,
         services,
         servicesById,
+        proxmoxAvailable: proxmox,
         editMode,
         openSettings,
         updateTileConfig,
         toast,
       },
-    [state, services, servicesById, editMode, openSettings, updateTileConfig, toast],
+    [state, services, servicesById, proxmox, editMode, openSettings, updateTileConfig, toast],
   );
 
   const paletteActions = useMemo(() => {

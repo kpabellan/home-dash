@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { WIDGETS } from "./widgets/registry";
-import { useProxmox } from "./DashContext";
+import { useDash, useProxmox } from "./DashContext";
 import { Button, Field, Modal, Select, inputClass } from "./ui";
 
 function timeZones() {
@@ -34,6 +34,32 @@ function NodeSelect({ value, onChange, emptyLabel }) {
       onChange={onChange}
       options={[{ value: "", label: emptyLabel ?? "Any" }, ...names.map((n) => ({ value: n, label: n }))]}
     />
+  );
+}
+
+// Where a metric tile gets its numbers: this server, the cluster, or one node.
+function MetricSourceSelect({ value, onChange }) {
+  const { proxmoxAvailable } = useDash();
+  const { data } = useProxmox(proxmoxAvailable);
+  const nodes = (data?.nodes ?? []).map((n) => n.name);
+  if (value?.startsWith("node:") && !nodes.includes(value.slice(5))) nodes.push(value.slice(5));
+  const options = [
+    { value: "auto", label: proxmoxAvailable ? "Automatic (Proxmox cluster)" : "Automatic (this server)" },
+    { value: "host", label: "This server (where Home Dash runs)" },
+    ...(proxmoxAvailable
+      ? [
+          { value: "cluster", label: "Proxmox cluster" },
+          ...nodes.map((n) => ({ value: `node:${n}`, label: `Proxmox node: ${n}` })),
+        ]
+      : []),
+  ];
+  return (
+    <>
+      <Select value={value || "auto"} onChange={onChange} options={options} />
+      {!proxmoxAvailable && (
+        <p className="text-xs text-fg-3 mt-2">Connect Proxmox to show your cluster or a node here.</p>
+      )}
+    </>
   );
 }
 
@@ -89,6 +115,7 @@ export default function TileConfigModal({ tile, services, onClose, onSave }) {
                 options={services.map((s) => ({ value: s.id, label: s.name }))}
               />
             )}
+            {f.type === "metricSource" && <MetricSourceSelect value={draft[f.key]} onChange={(v) => set(f.key, v)} />}
             {f.type === "pveNode" && (
               <NodeSelect value={draft[f.key]} onChange={(v) => set(f.key, v)} emptyLabel={f.emptyLabel} />
             )}

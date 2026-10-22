@@ -9,9 +9,10 @@ export function useDash() {
   return useContext(DashContext);
 }
 
-export function useSystem() {
+// `enabled` lets a widget skip a source it isn't showing, so it isn't polled.
+export function useSystem(enabled = true) {
   const { settings } = useDash();
-  return usePoll("/api/system", {
+  return usePoll(enabled ? "/api/system" : null, {
     interval: settings.general.systemInterval * 1000,
     historySize: 60,
   });
@@ -25,9 +26,9 @@ export function useStatus() {
   });
 }
 
-export function useProxmox() {
+export function useProxmox(enabled = true) {
   const { settings } = useDash();
-  return usePoll("/api/proxmox", {
+  return usePoll(enabled ? "/api/proxmox" : null, {
     interval: settings.general.proxmoxInterval * 1000,
   });
 }
