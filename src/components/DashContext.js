@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { usePoll } from "@/lib/usePoll";
+import { useStatusStream } from "@/lib/useStatusStream";
 
 export const DashContext = createContext(null);
 
@@ -18,12 +19,10 @@ export function useSystem(enabled = true) {
   });
 }
 
+// { data: { services: { id: result } }, history: { id: [result, …] }, error }
 export function useStatus() {
-  const { settings, services } = useDash();
-  return usePoll(services.length ? "/api/status" : null, {
-    interval: settings.general.statusInterval * 1000,
-    historySize: 30,
-  });
+  const { services } = useDash();
+  return useStatusStream(services.length > 0);
 }
 
 export function useProxmox(enabled = true) {
@@ -41,7 +40,7 @@ export function useWeather() {
     params.set("lat", location.lat);
     params.set("lon", location.lon);
   }
-  return usePoll(`/api/weather?${params}`, { interval: 15 * 60 * 1000 });
+  return usePoll(`/api/weather?${params}`, { interval: settings.general.weatherInterval * 1000 });
 }
 
 export function useNow(interval = 1000) {

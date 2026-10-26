@@ -1,7 +1,7 @@
 "use client";
 
 import { Droplets, MapPin, Thermometer, Wind, CloudOff } from "lucide-react";
-import { useDash, useWeather } from "../DashContext";
+import { useDash, useNow, useWeather } from "../DashContext";
 import { useElementSize } from "../charts";
 import { describeWeather } from "@/lib/weatherCodes";
 import { EmptyState, SetupButton } from "./common";
@@ -17,13 +17,16 @@ function dayLabel(date, i) {
   return new Date(`${date}T12:00`).toLocaleDateString([], { weekday: "short" });
 }
 
+// Hours that have finished drop off on the hour, without waiting for a fetch.
 function HourlyStrip({ hourly }) {
   const [ref, { width }] = useElementSize();
+  const now = useNow(30000);
   const count = Math.max(1, Math.floor(width / 54));
+  const upcoming = hourly.filter((hr) => hr.at == null || hr.at + 3600000 > now);
   return (
     <div ref={ref} className="flex justify-between gap-1 min-w-0">
       {width > 0 &&
-        hourly.slice(0, count).map((hr, i) => {
+        upcoming.slice(0, count).map((hr, i) => {
           const { Icon, color, label } = describeWeather(hr.code, hr.isDay);
           return (
             <div key={hr.time} className="flex flex-col items-center gap-1 min-w-[44px]" title={label}>

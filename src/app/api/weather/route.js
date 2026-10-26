@@ -27,7 +27,7 @@ export async function GET(req) {
 
   try {
     const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
-      next: { revalidate: 600 },
+      next: { revalidate: 120 },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const d = await res.json();
@@ -39,6 +39,8 @@ export async function GET(req) {
     );
     const hourly = d.hourly.time.slice(nowIdx, nowIdx + 24).map((time, i) => ({
       time,
+      // The hour as an instant, so the browser can roll past it between fetches.
+      at: Date.parse(`${time}:00Z`) - d.utc_offset_seconds * 1000,
       temp: d.hourly.temperature_2m[nowIdx + i],
       code: d.hourly.weather_code[nowIdx + i],
       pop: d.hourly.precipitation_probability?.[nowIdx + i] ?? null,

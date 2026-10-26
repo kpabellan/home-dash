@@ -462,18 +462,6 @@ function GeneralTab({ settings, update }) {
       <section>
         <SectionTitle>Refresh rates</SectionTitle>
         <div className="space-y-4">
-          <Field label="Service health checks">
-            <Select
-              value={String(g.statusInterval)}
-              onChange={(v) => update("general", { statusInterval: Number(v) })}
-              options={[
-                { value: "15", label: "Every 15 seconds" },
-                { value: "30", label: "Every 30 seconds" },
-                { value: "60", label: "Every minute" },
-                { value: "300", label: "Every 5 minutes" },
-              ]}
-            />
-          </Field>
           <Field label="System metrics">
             <Select
               value={String(g.systemInterval)}
@@ -494,6 +482,18 @@ function GeneralTab({ settings, update }) {
                 { value: "5", label: "Every 5 seconds" },
                 { value: "10", label: "Every 10 seconds" },
                 { value: "30", label: "Every 30 seconds" },
+              ]}
+            />
+          </Field>
+          <Field label="Weather" hint="Forecasts change every 15 minutes at most.">
+            <Select
+              value={String(g.weatherInterval)}
+              onChange={(v) => update("general", { weatherInterval: Number(v) })}
+              options={[
+                { value: "300", label: "Every 5 minutes" },
+                { value: "600", label: "Every 10 minutes" },
+                { value: "900", label: "Every 15 minutes" },
+                { value: "1800", label: "Every 30 minutes" },
               ]}
             />
           </Field>

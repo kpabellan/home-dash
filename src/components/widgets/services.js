@@ -28,12 +28,17 @@ function useLinkProps(url) {
   };
 }
 
+function downTitle(result) {
+  const since = result.since ? ` since ${new Date(result.since).toLocaleTimeString([], { timeStyle: "short" })}` : "";
+  return `Down${since}: ${result.error ?? "no response"}`;
+}
+
 function StatusLabel({ result }) {
   const state = serviceState(result);
   return (
     <span
       className="inline-flex items-center gap-1.5 text-xs text-fg-3 tabular-nums whitespace-nowrap"
-      title={state === "down" ? `Down: ${result.error ?? "no response"}` : undefined}
+      title={state === "down" ? downTitle(result) : undefined}
     >
       <StatusDot state={state} pulse />
       {state === "up" ? `${result.latency} ms` : state === "down" ? "Down" : "Checking"}
@@ -119,7 +124,7 @@ export function ServiceWidget({ w, h, config }) {
       description={service.description}
       isPrivate={service.private}
       result={data ? (data.services[service.id] ?? null) : undefined}
-      history={history.map((p) => p.data.services[service.id])}
+      history={history[service.id] ?? []}
       w={w}
       h={h}
     />
@@ -209,7 +214,14 @@ export function StatusWidget({ w, h, config }) {
   const sorted = [...down, ...up].concat(results.filter((r) => !r.result));
   const showBars = w >= 5;
 
-  const summary = down.length ? (
+  // Everything failing at once points at Home Dash's own connection.
+  const summary =
+    down.length > 1 && down.length === results.length ? (
+      <span className="flex items-center gap-1.5">
+        <AlertTriangle size={13} style={{ color: "var(--bad)" }} />
+        Can&apos;t reach any services. Check Home Dash&apos;s network.
+      </span>
+    ) : down.length ? (
     <span className="flex items-center gap-1.5">
       <AlertTriangle size={13} style={{ color: "var(--bad)" }} />
       {down.length} {down.length === 1 ? "service" : "services"} down
@@ -251,7 +263,7 @@ export function StatusWidget({ w, h, config }) {
           <div key={service.id} className="flex items-center gap-2.5 px-1 py-1 text-sm">
             <ServiceIcon src={service.icon} name={service.name} size={18} />
             <span className="truncate flex-1 min-w-0 text-fg-2">{service.name}</span>
-            {showBars && <HistoryBars samples={history.map((p) => p.data.services[service.id])} />}
+            {showBars && <HistoryBars samples={history[service.id] ?? []} />}
             <span className="w-[4.5rem] flex justify-end">
               <StatusLabel result={result} />
             </span>

@@ -22,9 +22,12 @@ Layout and settings are stored in your browser. Use **Settings → Data** to exp
 | --- | --- |
 | `OPENWEATHER_LATITUDE` / `OPENWEATHER_LONGITUDE` | Default weather location. You can also pick a city in **Settings → General**. Weather uses [Open-Meteo](https://open-meteo.com/), so no API key is needed. |
 | `DISK_PATHS` | Optional comma-separated mounts for the Storage widget, e.g. `Root=/,NAS=/mnt/nas`. Defaults to the drive the app runs from. |
+| `STATUS_INTERVAL` | Optional seconds between health checks of each service. Defaults to `15`. |
 | `SOUNDS_DIR` | Optional folder for the Sounds widget's audio files. Defaults to `data/sounds` in the app folder. |
 
-Service health checks run on the server: any HTTP response below 500 counts as online, and self-signed certificates are accepted.
+Service health checks run on the server while anyone has the dashboard open, and each result reaches the browser the moment it's in, without polling. Any HTTP response below 500 counts as online, and self-signed certificates are accepted.
+
+To avoid false alarms, a service is only shown as down after three failed attempts over a few seconds, with up to 8 seconds allowed for each. A down service is rechecked every 5 seconds, so it turns green again quickly. Check history lives on the server, so it survives a page reload. If every service fails at once, the health tile says Home Dash itself can't reach the network rather than listing them all as down.
 
 ## Proxmox cluster
 
