@@ -81,7 +81,9 @@ yt-dlp --no-playlist -x --audio-format m4a -o "sounds/%(title)s.%(ext)s" "<video
 
 ### Schedules
 
-In **Settings → Sounds → Schedule**, choose a time and the days, add the sounds to play with their volumes, then set an optional fade-in and stop time. **Use what's in the tile** copies the sounds and volumes you have set up right now. Schedules run in the browser, so keep the dashboard open in a tab, for example as your start page, and keep the device awake.
+In **Settings → Sounds → Schedule**, choose a time and the days, add the sounds to play with their volumes, then set an optional fade-in and stop time. **Use what's in the tile** copies the sounds and volumes you have set up right now.
+
+If something is already playing when a schedule starts, the schedule joins in rather than replacing it. Its sounds fade in, a sound that's already playing moves to the schedule's volume, and everything else keeps going. A stop time then stops only the sounds that schedule added. Schedules run in the browser, so keep the dashboard open in a tab, for example as your start page, and keep the device awake.
 
 Browsers won't start sound on a page that hasn't been clicked since it loaded. If a schedule hits that, a **Play** button appears at the top of the page. To skip it, allow autoplay for the dashboard's address:
 

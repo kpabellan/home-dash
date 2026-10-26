@@ -93,6 +93,8 @@ function dueSchedule(schedules, now, fired) {
 export function useSoundEngine(sounds, update, toast) {
   const engine = useRef(null);
   const fadeTimer = useRef(null);
+  // Sounds a schedule added to something already playing, and when to stop them.
+  const removals = useRef([]);
   const [playing, setPlaying] = useState(false);
   const [blocked, setBlocked] = useState(null);
   const [stopAt, setStopAt] = useState(null);
@@ -120,21 +122,29 @@ export function useSoundEngine(sounds, update, toast) {
     return engine.current;
   }, []);
 
-  // Makes the playing decks match the track list: adds new sounds (fading
-  // them in if already playing), drops removed ones, and applies volumes.
+  // Makes the playing decks match the track list: fades new sounds in and
+  // removed ones out, and moves changed volumes over `fade` seconds. Volumes
+  // that haven't changed are left alone, so a slow fade isn't cut short.
   const sync = useCallback(
-    (tracks) => {
+    (tracks, fade = 0) => {
       const e = engine.current;
       if (!e) return;
       const wanted = new Set(tracks.map((t) => t.id));
       for (const [id, d] of e.decks) {
         if (wanted.has(id)) continue;
         remember();
-        d.el.pause();
-        d.el.removeAttribute("src");
-        d.el.load();
-        d.source.disconnect();
         e.decks.delete(id);
+        const out = Math.max(0.3, fade);
+        ramp(e.ctx, d.gain.gain, 0, out);
+        setTimeout(
+          () => {
+            d.el.pause();
+            d.el.removeAttribute("src");
+            d.el.load();
+            d.source.disconnect();
+          },
+          out * 1000 + 50,
+        );
       }
       for (const t of tracks) {
         let d = e.decks.get(t.id);
@@ -152,11 +162,14 @@ export function useSoundEngine(sounds, update, toast) {
           });
           const at = readJson(POSITIONS_KEY)[t.id];
           el.src = soundUrl(t.id) + (at ? `#t=${at}` : "");
-          d = { el, gain, source };
+          d = { el, gain, source, volume: null };
           e.decks.set(t.id, d);
           if (latest.current.playing) el.play().catch(() => {});
         }
-        ramp(e.ctx, d.gain.gain, trackGain(t.volume ?? DEFAULT_TRACK_VOLUME), added ? 0.8 : 0.06);
+        const volume = t.volume ?? DEFAULT_TRACK_VOLUME;
+        if (volume === d.volume) continue;
+        d.volume = volume;
+        ramp(e.ctx, d.gain.gain, trackGain(volume), Math.max(added ? 0.8 : 0.06, fade));
       }
     },
     [remember, toast],
@@ -203,6 +216,7 @@ export function useSoundEngine(sounds, update, toast) {
       setPlaying(false);
       setStopAt(null);
       setBlocked(null);
+      removals.current = [];
       const e = engine.current;
       if (!e) return;
       ramp(e.ctx, e.master.gain, 0, fadeOut);
@@ -216,6 +230,31 @@ export function useSoundEngine(sounds, update, toast) {
       );
     },
     [remember],
+  );
+
+  // A schedule joins whatever is already playing: its sounds fade in, or move
+  // to the schedule's volume if they're already on, and everything else
+  // carries on. With nothing playing it simply starts its own sounds.
+  const runSchedule = useCallback(
+    (s) => {
+      const fadeIn = s.fadeIn ?? 0;
+      const stopAfter = s.duration ?? 0;
+      const { playing, sounds } = latest.current;
+      if (!playing) return play({ tracks: s.tracks, fadeIn, stopAfter });
+
+      const current = sounds.tracks;
+      const on = new Set(current.map((t) => t.id));
+      const levels = new Map(s.tracks.map((t) => [t.id, t]));
+      const added = s.tracks.filter((t) => !on.has(t.id));
+      const tracks = [...current.map((t) => levels.get(t.id) ?? t), ...added];
+      sync(tracks, fadeIn);
+      update("sounds", { tracks });
+      // "Stop after" only stops what this schedule started.
+      if (stopAfter && added.length) {
+        removals.current.push({ at: Date.now() + stopAfter * 60000, ids: added.map((t) => t.id) });
+      }
+    },
+    [play, sync, update],
   );
 
   // Adding, removing or re-levelling a sound takes effect right away.
@@ -238,13 +277,21 @@ export function useSoundEngine(sounds, update, toast) {
       if (playing) {
         remember();
         if (stopAt && Date.now() >= stopAt) pause(8);
+        const ending = removals.current.filter((r) => Date.now() >= r.at);
+        if (ending.length) {
+          removals.current = removals.current.filter((r) => !ending.includes(r));
+          const ids = new Set(ending.flatMap((r) => r.ids));
+          const tracks = sounds.tracks.filter((t) => !ids.has(t.id));
+          sync(tracks, 8);
+          update("sounds", { tracks });
+        }
       }
       const fired = readJson(FIRED_KEY);
       const due = dueSchedule(sounds.schedules, new Date(), fired);
       if (!due) return;
       // Recorded first so another open tab doesn't start it a second time.
       writeJson(FIRED_KEY, { ...fired, [due.s.id]: due.key });
-      play({ tracks: due.s.tracks, fadeIn: due.s.fadeIn ?? 0, stopAfter: due.s.duration ?? 0 });
+      runSchedule(due.s);
     };
     tick();
     const id = setInterval(tick, 10000);
@@ -255,7 +302,7 @@ export function useSoundEngine(sounds, update, toast) {
       document.removeEventListener("visibilitychange", tick);
       window.removeEventListener("pagehide", remember);
     };
-  }, [ready, play, pause, remember]);
+  }, [ready, runSchedule, pause, remember, sync, update]);
 
   // Hardware media keys and the OS "now playing" controls.
   useEffect(() => {
