@@ -31,6 +31,8 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 # services.json is read at runtime (so it can also be bind-mounted)
 COPY --from=builder /app/src/data ./src/data
+# Audio for the Sounds widget; mount a volume here to keep it across rebuilds
+RUN mkdir -p data/sounds
 
 EXPOSE 3000
 

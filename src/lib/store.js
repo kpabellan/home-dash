@@ -74,6 +74,8 @@ export const DEFAULT_SETTINGS = {
   },
   clock: { hour12: true, showSeconds: false },
   weather: { location: null, units: "imperial" },
+  // tracks: [{ id: file name in the sounds library, volume: 0-100 }]
+  sounds: { tracks: [], schedules: [] },
   appearance: {
     theme: "dark",
     accent: "#7c8cff",

@@ -22,6 +22,10 @@ Thumbs.db
 # Build outputs
 out
 
+# Sound library (mounted as a volume instead)
+data
+sounds
+
 # Docker-related
 Dockerfile
 docker-compose.yml

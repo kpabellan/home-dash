@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Link2,
   MemoryStick,
+  Music,
   Network,
   Search,
   Server,
@@ -22,6 +23,7 @@ import { WeatherWidget } from "./weather";
 import { CpuWidget, MemoryWidget, NetworkWidget, StorageWidget, SystemWidget } from "./system";
 import { GROUPS, LinkWidget, ServicesWidget, ServiceWidget, StatusWidget } from "./services";
 import { NotesWidget, SearchWidget } from "./tools";
+import { SoundsWidget } from "./sounds";
 import { ProxmoxClusterWidget, ProxmoxGuestsWidget, ProxmoxNodeWidget, ProxmoxStorageWidget } from "./proxmox";
 import { SEARCH_ENGINES } from "@/lib/store";
 
@@ -104,6 +106,16 @@ export const WIDGETS = {
     min: { w: 2, h: 2 },
     max: { w: 12, h: 8 },
     fields: [{ key: "title", label: "Title", type: "text", placeholder: "Notes" }],
+  },
+  sounds: {
+    name: "Sounds",
+    description: "Play and mix rain, lofi or any audio from your server, with a sleep timer and schedules.",
+    icon: Music,
+    category: "Essentials",
+    component: SoundsWidget,
+    size: { w: 4, h: 2 },
+    min: { w: 3, h: 1 },
+    max: { w: 8, h: 3 },
   },
   system: {
     name: "System overview",

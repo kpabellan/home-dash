@@ -6,4 +6,6 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    volumes:
+      - ./sounds:/app/data/sounds
     restart: unless-stopped

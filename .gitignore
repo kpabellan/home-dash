@@ -41,5 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Sound library (audio files are large and personal)
+/data/
+
 # Ignore services.json
 services.json

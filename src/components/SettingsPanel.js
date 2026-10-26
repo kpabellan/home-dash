@@ -12,6 +12,7 @@ import {
   MapPin,
   Monitor,
   Moon,
+  Music,
   Palette,
   RotateCcw,
   Settings2,
@@ -21,12 +22,14 @@ import {
   X,
 } from "lucide-react";
 import { ACCENTS, BACKGROUNDS, SEARCH_ENGINES } from "@/lib/store";
+import SoundsTab from "./SoundSettings";
 import { Button, Field, IconButton, SectionTitle, Segmented, Select, Slider, Toggle, cx, inputClass } from "./ui";
 
 const TABS = [
-  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "appearance", label: "Theme", icon: Palette },
   { id: "layout", label: "Layout", icon: LayoutGrid },
   { id: "general", label: "General", icon: SlidersHorizontal },
+  { id: "sounds", label: "Sounds", icon: Music },
   { id: "data", label: "Data", icon: Settings2 },
 ];
 
@@ -53,19 +56,23 @@ export default function SettingsPanel({ open, tab, setTab, onClose, ...props }) 
             <X size={18} />
           </IconButton>
         </div>
-        <nav className="px-5 pb-3 flex gap-1 border-b border-line overflow-x-auto no-scrollbar">
+        <nav
+          className="px-5 pb-3 grid gap-1 border-b border-line"
+          style={{ gridTemplateColumns: `repeat(${TABS.length}, minmax(0, 1fr))` }}
+        >
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
+              aria-current={tab === t.id ? "page" : undefined}
               className={cx(
-                "inline-flex items-center gap-1.5 rounded-lg px-2.5 h-8 text-sm font-medium whitespace-nowrap transition",
+                "flex flex-col items-center justify-center gap-1 rounded-xl h-14 px-1 text-xs font-medium transition min-w-0",
                 tab === t.id ? "bg-accent/15 text-fg" : "text-fg-2 hover:text-fg hover:bg-[var(--hover)]",
               )}
             >
-              <t.icon size={14} />
-              {t.label}
+              <t.icon size={16} />
+              <span className="truncate max-w-full">{t.label}</span>
             </button>
           ))}
         </nav>
@@ -73,6 +80,7 @@ export default function SettingsPanel({ open, tab, setTab, onClose, ...props }) 
           {tab === "appearance" && <AppearanceTab {...props} />}
           {tab === "layout" && <LayoutTab {...props} />}
           {tab === "general" && <GeneralTab {...props} />}
+          {tab === "sounds" && <SoundsTab {...props} />}
           {tab === "data" && <DataTab {...props} />}
         </div>
       </aside>

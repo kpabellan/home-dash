@@ -5,6 +5,8 @@ import {
   Check,
   LayoutDashboard,
   Moon,
+  Music,
+  Pause,
   Pencil,
   Plus,
   RotateCcw,
@@ -21,6 +23,7 @@ import SettingsPanel from "./SettingsPanel";
 import WidgetLibrary from "./WidgetLibrary";
 import TileConfigModal from "./TileConfigModal";
 import CommandPalette from "./CommandPalette";
+import { SoundContext, SoundPrompt, useSoundEngine } from "./SoundEngine";
 import { WIDGETS } from "./widgets/registry";
 import { Button, IconButton, cx } from "./ui";
 import {
@@ -43,6 +46,14 @@ function contrastText(hex) {
     return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   });
   return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3 ? "#0b0d12" : "#ffffff";
+}
+
+function Providers({ ctx, sound, children }) {
+  return (
+    <DashContext.Provider value={ctx}>
+      <SoundContext.Provider value={sound}>{children}</SoundContext.Provider>
+    </DashContext.Provider>
+  );
 }
 
 export default function Dashboard({ services, proxmox = false }) {
@@ -301,6 +312,8 @@ export default function Dashboard({ services, proxmox = false }) {
     }
   };
 
+  const sound = useSoundEngine(state?.settings.sounds, update, toast);
+
   const openSettings = useCallback((tab = "appearance") => {
     setSettingsTab(tab);
     setSettingsOpen(true);
@@ -342,10 +355,11 @@ export default function Dashboard({ services, proxmox = false }) {
         proxmoxAvailable: proxmox,
         editMode,
         openSettings,
+        updateSettings: update,
         updateTileConfig,
         toast,
       },
-    [state, services, servicesById, proxmox, editMode, openSettings, updateTileConfig, toast],
+    [state, services, servicesById, proxmox, editMode, openSettings, update, updateTileConfig, toast],
   );
 
   const paletteActions = useMemo(() => {
@@ -368,8 +382,14 @@ export default function Dashboard({ services, proxmox = false }) {
       },
       { id: "a:board", label: "New board", icon: LayoutDashboard, run: addBoard },
       { id: "a:pve", label: "Create a Proxmox board", icon: ServerCog, run: addProxmoxBoard },
+      {
+        id: "a:sound",
+        label: sound.playing ? "Pause sounds" : "Play sounds",
+        icon: sound.playing ? Pause : Music,
+        run: sound.toggle,
+      },
     ];
-  }, [state, editMode, openSettings, update, addProxmoxBoard]);
+  }, [state, editMode, openSettings, update, addProxmoxBoard, sound]);
 
   if (!state || !ctx) return null;
 
@@ -379,7 +399,7 @@ export default function Dashboard({ services, proxmox = false }) {
   const showTabs = state.boards.length > 1 || editMode;
 
   return (
-    <DashContext.Provider value={ctx}>
+    <Providers ctx={ctx} sound={sound}>
       <Background appearance={settings.appearance} upload={upload} />
 
       <main
@@ -590,6 +610,7 @@ export default function Dashboard({ services, proxmox = false }) {
         onBoard={switchBoard}
         settings={settings}
       />
-    </DashContext.Provider>
+      <SoundPrompt />
+    </Providers>
   );
 }

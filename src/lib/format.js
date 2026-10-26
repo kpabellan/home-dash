@@ -65,3 +65,11 @@ export function greeting(date = new Date()) {
   if (h < 18) return "Good afternoon";
   return "Good evening";
 }
+
+// "Lofi_Jazz.m4a" -> "Lofi Jazz"
+export function soundTitle(file) {
+  return (file ?? "")
+    .replace(/\.[^.]+$/, "")
+    .replace(/_+/g, " ")
+    .trim();
+}
